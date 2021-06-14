@@ -3,6 +3,8 @@ from .serializers import GameSerializer
 from .models import Game
 from uuid import uuid4
 
+import json
+
 
 class GameViewSet(viewsets.ModelViewSet):
     queryset = Game.objects.all()
@@ -17,8 +19,7 @@ class GameViewSet(viewsets.ModelViewSet):
         '''
         print(request.data)
         new_uuid = uuid4()
-        new_game = {
-            "fen_line": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", "uuid": new_uuid}
+        new_game = {"uuid": new_uuid}
         request.data.update(new_game)
         super().create(request)
         return response.Response(data=str(new_uuid))
@@ -28,5 +29,19 @@ class GameViewSet(viewsets.ModelViewSet):
         (GET) /games
         Retrieve a list of games from the database
         Returns a JSON object containing the games
+        foo = json.dumps(Square().__dict__)
         '''
         return super().list(request)
+
+    def update(self, request):
+        '''
+            - retrieve move
+            - retrieve game by id
+            - ask for move validity
+            - if True
+                update db
+              else
+                return Error
+        '''
+        return super().list(request)
+        # return super().update(request)
