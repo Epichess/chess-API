@@ -32,16 +32,3 @@ class GameViewSet(viewsets.ModelViewSet):
         foo = json.dumps(Square().__dict__)
         '''
         return super().list(request)
-
-    def update(self, request):
-        '''
-            - retrieve move
-            - retrieve game by id
-            - ask for move validity
-            - if True
-                update db
-              else
-                return Error
-        '''
-        return super().list(request)
-        # return super().update(request)
