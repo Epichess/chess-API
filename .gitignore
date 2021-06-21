@@ -1,5 +1,4 @@
 .venv
 .vscode
-memo.md
 *.pyc
 .gitignore
