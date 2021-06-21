@@ -13,6 +13,7 @@ class Game(models.Model):
     game_json = models.CharField(
         max_length=1000, default=json.dumps(Board().__dict__))
     uuid = models.UUIDField(default=uuid4)
+    full = models.BooleanField(default=False)
 
     def __str__(self):
-        return '{"Created" : "{0}", "UUID" : "{1}", "Game" : "{2}"'.format(self.created, self.uuid, self.game_json)
+        return "{0}\n{1}\n{2}\n{3}\n".format(self.created, self.uuid, self.game_json, str(self.full))
