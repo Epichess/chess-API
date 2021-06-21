@@ -1,6 +1,5 @@
 from django.core import serializers
 from datetime import datetime
-import json
 from ..models import Game
 
 
@@ -21,20 +20,20 @@ def game_handler(sio):
     def get_games(sid):
         games = serializers.serialize(
             'json', Game.objects.all(), fields=('created', 'uuid', 'game_json'))
-        sio.emit('games', {'data': games})
+        sio.emit('games', {'data': games}, room=sid)
 
     @sio.event
     def get_by_uuid(sid, message):
         games = serializers.serialize(
             'json', [Game.objects.get(uuid=message['uuid'])])
-        sio.emit('response', {'data': games})
+        sio.emit('response', {'data': games}, room=sid)
 
     @sio.event
     def create_game(sid):
         new_game = Game(created=datetime.now())
         new_game.save()
         sio.emit('creating', {'data': serializers.serialize(
-            'json', [new_game], fields=('created', 'uuid'))})
+            'json', [new_game], fields=('created', 'uuid'))}, room=sid)
         join_room(sid, new_game.uuid)
 
     @sio.event
@@ -46,12 +45,12 @@ def game_handler(sio):
             game.full = True
             game.save()
             sio.emit('joining', {'data': serializers.serialize(
-                'json', [game], fields=('created', 'uuid'))})
+                'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
         else:
             sio.emit('error', {
                 'data': 'No currently joinable game'
-            })
+            }, room=sid)
 
     @sio.event
     def join_game_uuid(sid, msg):
@@ -61,12 +60,12 @@ def game_handler(sio):
             game.full = True
             game.save()
             sio.emit('joining', {'data': serializers.serialize(
-                'json', [game], fields=('created', 'uuid'))})
+                'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
         else:
             sio.emit('error', {
                 'data': 'No currently joinable game'
-            })
+            }, room=sid)
 
     @sio.event
     def new_game(sid):
@@ -77,13 +76,13 @@ def game_handler(sio):
             game.full = True
             game.save()
             sio.emit('joining', {'data': serializers.serialize(
-                'json', [game], fields=('created', 'uuid'))})
+                'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
         else:
             game = Game(created=datetime.now())
             game.save()
             sio.emit('creating', {'data': serializers.serialize(
-                'json', [game], fields=('created', 'uuid'))})
+                'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
 
     @sio.event
