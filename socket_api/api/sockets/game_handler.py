@@ -21,7 +21,7 @@ def game_handler(sio):
     def get_games(sid):
         games = serializers.serialize(
             'json', Game.objects.all(), fields=('created', 'uuid', 'game_json'))
-        sio.emit('response', {'data': games})
+        sio.emit('games', {'data': games})
 
     @sio.event
     def get_by_uuid(sid, message):
@@ -85,3 +85,13 @@ def game_handler(sio):
             sio.emit('creating', {'data': serializers.serialize(
                 'json', [game], fields=('created', 'uuid'))})
             join_room(sid, game.uuid)
+
+    @sio.event
+    def delete_game(sid, msg):
+        uuid = msg['uuid']
+        game = Game.objects.get(uuid=uuid)
+        game.delete()
+
+    @sio.event
+    def delete_all(sid):
+        Game.objects.all().delete()

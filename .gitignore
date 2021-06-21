@@ -3,3 +3,4 @@
 *.pyc
 .gitignore
 static
+db.sqlite3
