@@ -9,6 +9,7 @@ from datetime import datetime
 import json
 from api.models import Game
 from api.sockets.game_handler import game_handler
+from api.sockets.user_handler import user_handler
 async_mode = None
 
 
@@ -23,6 +24,8 @@ def index(request):
 
 # socket-io game relative event
 game_handler(sio)
+# socket-io user relative event
+user_handler(sio)
 
 
 @sio.event
