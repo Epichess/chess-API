@@ -1,19 +1,23 @@
 from django.contrib.auth.models import User
+from ..models import Player
 from django.core import serializers
+
+from django.dispatch import receiver
 
 
 def user_handler(sio):
 
-    @sio.event
+    @ sio.event
     def create_user(sid, msg):
         try:
-            new_user = User.objects.create_user(
+            User.objects.create_user(
                 msg['username'],
                 msg['mail'],
                 msg['password']
             )
             sio.emit('user', {'data': 'User created'})
         except Exception as e:
+            print(e)
             if (str(e).split(' ')[0] == "UNIQUE"):
                 sio.emit(
                     'error', {'data': str(e).split('.')[1] + ' already exists'}, room=sid)
@@ -34,7 +38,8 @@ def user_handler(sio):
     def get_user(sid, msg):
         try:
             user = User.objects.get(username=msg['username'])
-            sio.emit('user', {'data': serializers.serialize('json', [user])})
+            sio.emit('user', {'data': serializers.serialize(
+                'json', [user, user.player])})
         except Exception as e:
             print(e)
             sio.emit(

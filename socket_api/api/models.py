@@ -5,6 +5,11 @@ from .board import Board
 
 from django.core.serializers.json import DjangoJSONEncoder
 
+from django.contrib.auth.models import User
+
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
 # Create your models here.
 
 
@@ -17,3 +22,18 @@ class Game(models.Model):
 
     def __str__(self):
         return "{0}\n{1}\n{2}\n{3}\n".format(self.created, self.uuid, self.game_json, str(self.full))
+
+
+class Player(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    elo = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'player'
+
+
+@receiver(post_save, sender=User)
+def update_profile_signal(sender, instance, created, **kwargs):
+    if created:
+        Player.objects.create(user=instance)
+    instance.player.save()
