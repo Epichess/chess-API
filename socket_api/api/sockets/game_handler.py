@@ -5,16 +5,20 @@ from ..models import Game
 
 def game_handler(sio):
     def join_room(sid, uuid):
-        sio.enter_room(sid, uuid)
+        sio.enter_room(sid, str(uuid))
+        sio.emit('room_update', {
+                 'data': 'another player joined'}, room=str(uuid), skip_sid=sid)
 
     def left_room(sid, uuid):
-        sio.leave_room(sid, uuid)
+        sio.emit('room_update', {
+                 'data': 'the other player left'}, room=str(uuid), skip_sid=sid)
+        sio.leave_room(sid, str(uuid))
 
     def close_room(sid, uuid):
-        sio.close_room(uuid)
+        sio.close_room(str(uuid))
 
-    def send_to_room(uuid, msg):
-        sio.emit('message', {'data': msg}, room=uuid)
+    def send_to_room(sid, uuid, msg):
+        sio.emit('message', {'data': msg}, room=str(uuid), skip_sid=sid)
 
     @sio.event
     def get_games(sid):
