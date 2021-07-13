@@ -1,6 +1,9 @@
+from api.sockets.json_handler import BoardEncoder
 from django.core import serializers
 from datetime import datetime
 from ..models import Game
+from api.sockets.chesssimul.board import Board
+import json
 
 
 def game_handler(sio):
@@ -34,11 +37,14 @@ def game_handler(sio):
 
     @sio.event
     def create_game(sid):
-        new_game = Game(created=datetime.now())
-        new_game.save()
+        game = Game(created=datetime.now())
+        board = Board()
+        board.init_board()
+        game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
+        game.save()
         sio.emit('creating', {'data': serializers.serialize(
-            'json', [new_game], fields=('created', 'uuid'))}, room=sid)
-        join_room(sid, new_game.uuid)
+            'json', [game], fields=('created', 'uuid'))}, room=sid)
+        join_room(sid, game.uuid)
 
     @sio.event
     def join_game(sid):
@@ -84,17 +90,20 @@ def game_handler(sio):
             join_room(sid, game.uuid)
         else:
             game = Game(created=datetime.now())
+            board = Board()
+            board.init_board()
+            game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
             game.save()
             sio.emit('creating', {'data': serializers.serialize(
                 'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
 
-    @sio.event
+    @ sio.event
     def delete_game(sid, msg):
         uuid = msg['uuid']
         game = Game.objects.get(uuid=uuid)
         game.delete()
 
-    @sio.event
+    @ sio.event
     def delete_all(sid):
         Game.objects.all().delete()
