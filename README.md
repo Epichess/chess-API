@@ -10,11 +10,11 @@ Here's the **How to** install and start the **api server**
 
 ## Create virtual environment (optional)
 
-Create a virtual environment with python :
+**Create** a virtual environment with python :
 
 	python -m venv [venv directory name i.e .venv]
 
-Activate an existing virtual environment :
+**Activate** an existing virtual environment :
 
 * In a Linux environment :
 
@@ -23,13 +23,13 @@ Activate an existing virtual environment :
 
 		.venv\Scripts\activate.bat
 
-Exit a virtual environment :
+**Exit** a virtual environment :
 
 	deactivate
 
 ## Install python pre-requisites
 
-Install requirements.txt file with python pip :
+Install requirements.txt file with python pip (inside your venv e.g.):
 
 	python -m pip install -r requirements.txt
 
