@@ -1,20 +1,27 @@
+from api.sockets.json_handler import BoardEncoder
 from django.core import serializers
 from datetime import datetime
 from ..models import Game
+from api.sockets.chesssimul.board import Board
+import json
 
 
 def game_handler(sio):
     def join_room(sid, uuid):
-        sio.enter_room(sid, uuid)
+        sio.enter_room(sid, str(uuid))
+        sio.emit('room_update', {
+                 'data': 'another player joined'}, room=str(uuid), skip_sid=sid)
 
     def left_room(sid, uuid):
-        sio.leave_room(sid, uuid)
+        sio.emit('room_update', {
+                 'data': 'the other player left'}, room=str(uuid), skip_sid=sid)
+        sio.leave_room(sid, str(uuid))
 
     def close_room(sid, uuid):
-        sio.close_room(uuid)
+        sio.close_room(str(uuid))
 
-    def send_to_room(uuid, msg):
-        sio.emit('message', {'data': msg}, room=uuid)
+    def send_to_room(sid, uuid, msg):
+        sio.emit('message', {'data': msg}, room=str(uuid), skip_sid=sid)
 
     @sio.event
     def get_games(sid):
@@ -30,11 +37,14 @@ def game_handler(sio):
 
     @sio.event
     def create_game(sid):
-        new_game = Game(created=datetime.now())
-        new_game.save()
+        game = Game(created=datetime.now())
+        board = Board()
+        board.init_board()
+        game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
+        game.save()
         sio.emit('creating', {'data': serializers.serialize(
-            'json', [new_game], fields=('created', 'uuid'))}, room=sid)
-        join_room(sid, new_game.uuid)
+            'json', [game], fields=('created', 'uuid'))}, room=sid)
+        join_room(sid, game.uuid)
 
     @sio.event
     def join_game(sid):
@@ -80,17 +90,20 @@ def game_handler(sio):
             join_room(sid, game.uuid)
         else:
             game = Game(created=datetime.now())
+            board = Board()
+            board.init_board()
+            game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
             game.save()
             sio.emit('creating', {'data': serializers.serialize(
                 'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
 
-    @sio.event
+    @ sio.event
     def delete_game(sid, msg):
         uuid = msg['uuid']
         game = Game.objects.get(uuid=uuid)
         game.delete()
 
-    @sio.event
+    @ sio.event
     def delete_all(sid):
         Game.objects.all().delete()

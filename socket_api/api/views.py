@@ -10,6 +10,7 @@ import json
 from api.models import Game
 from api.sockets.game_handler import game_handler
 from api.sockets.user_handler import user_handler
+from api.sockets.move_handler import move_handler
 async_mode = None
 
 
@@ -26,12 +27,21 @@ def index(request):
 game_handler(sio)
 # socket-io user relative event
 user_handler(sio)
+# socket-io move relative event
+move_handler(sio)
 
 
 @sio.event
 def pong(sid, message):
     data = json.loads(message)
     sio.emit('response', {'data': data['text']})
+
+
+@sio.event
+def chat(sid, message):
+    data = json.loads(message)
+    sio.emit('response', {'data': data['text']},
+             room=data['uuid'], skip_sid=sid)
 
 
 @ sio.event
