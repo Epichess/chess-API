@@ -2,8 +2,8 @@ from django.core import serializers
 from datetime import datetime
 from api.sockets.json_handler import BoardDecoder, BoardEncoder
 from ..models import Game
-from api.sockets.chesssimul.board import Board
-from api.sockets.chesssimul.coup import Move
+# from api.sockets.chesssimul.board import Board
+# from api.sockets.chesssimul.move import Move
 import json
 
 
@@ -31,6 +31,6 @@ def move_handler(sio):
         if (board.make_move(move)):
             game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
             game.save()
-            sio.emit('move', {'data': 'success'})
+            sio.emit('move', {'data': 'success', 'legal': 'true'})
         else:
-            sio.emit('error', {'data': "Move isn't legal"})
+            sio.emit('move', {'data': 'move isn\'t legal', 'legal': 'false'})
