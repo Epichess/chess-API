@@ -41,12 +41,11 @@ def game_handler(sio):
         game = Game(created=datetime.now())
         board = Board()
 
-        # board.init_board()
         game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
+        game.save()
 
         print(game.game_json)
 
-        game.save()
         sio.emit('creating', {'data': serializers.serialize(
             'json', [game], fields=('created', 'uuid'))}, room=sid)
         join_room(sid, game.uuid)
@@ -96,9 +95,10 @@ def game_handler(sio):
         else:
             game = Game(created=datetime.now())
             board = Board()
-            board.init_board()
+
             game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
             game.save()
+
             sio.emit('creating', {'data': serializers.serialize(
                 'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
