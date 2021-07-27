@@ -2,8 +2,6 @@ from django.core import serializers
 from datetime import datetime
 from api.sockets.json_handler import BoardDecoder, BoardEncoder
 from ..models import Game
-# from api.sockets.chesssimul.board import Board
-# from api.sockets.chesssimul.move import Move
 from api.sockets.src.ia.move import Move
 import json
 
@@ -18,6 +16,22 @@ def move_handler(sio):
 
     @sio.event
     def make_move(sid, message):
+        """ Check a move legality and tries to make it.
+
+        Parameters:
+            {
+                'uuid': [game uuid],
+                'start': [starting square e.g. 'A2'],
+                'end': [ending square e.g. 'A2']
+            }
+
+        Response:
+            {
+                'data': [message],
+                'legal': [boolean]
+            }
+
+        """
         uuid = message['uuid']
         start = message['start']
         end = message['end']

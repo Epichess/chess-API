@@ -9,6 +9,21 @@ def user_handler(sio):
 
     @ sio.event
     def create_user(sid, msg):
+        """ Create user and persist it in the database.
+
+        Parameters:
+            {
+                'username': [username],
+                'mail': [e-mail address],
+                'password': [password]
+            }
+
+        Response:
+            {
+                'user': {'data': 'User created'}
+            }
+
+        """
         try:
             User.objects.create_user(
                 msg['username'],
@@ -24,6 +39,19 @@ def user_handler(sio):
 
     @sio.event
     def delete_user(sid, msg):
+        """ Delete user using his username.
+
+        Parameters:
+            {
+                'username': [username]
+            }
+
+        Response:
+            {
+                'user': {'data': 'User deleted'}
+            }
+
+        """
         try:
             User.objects.get(username=msg['username']).delete()
             sio.emit('user', {'data': 'User deleted'})
@@ -36,6 +64,19 @@ def user_handler(sio):
 
     @sio.event
     def get_user(sid, msg):
+        """ Retrieve user using his username.
+
+        Parameters:
+            {
+                'username': [username]
+            }
+
+        Response:
+            {
+                'user': {player object}
+            }
+
+        """
         try:
             user = User.objects.get(username=msg['username'])
             sio.emit('user', {'data': serializers.serialize(
@@ -49,6 +90,17 @@ def user_handler(sio):
 
     @sio.event
     def get_users(sid):
+        """ Retrieve all the users in database.
+
+        Parameters:
+            None
+
+        Response:
+            {
+                'user': [{player object}]
+            }
+
+        """
         try:
             users = User.objects.all()
             sio.emit('user', {'data': serializers.serialize('json', users)})

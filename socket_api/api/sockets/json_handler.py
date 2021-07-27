@@ -1,4 +1,3 @@
-# from api.sockets.chesssimul.board import Board
 import collections
 from api.sockets.src.ia.chessBitBoard import Bitboard as Board
 from api.sockets.src.ia.chessBitBoard import BitBoardMoveGenerator as BitBoardMoveGenerator
@@ -7,13 +6,6 @@ import api.sockets.src.ia.boardInfo as boardInfo
 from boardInfo import BoardInfo
 from collections import deque
 import json
-# import api.sockets.chesssimul.square as square
-# import api.sockets.chesssimul.piece as piece
-# import api.sockets.chesssimul.move as coup
-# from square import Square
-# from piece import Color, PieceType
-# from piece import *
-# from square import Square
 
 
 class BoardEncoder(json.JSONEncoder):
