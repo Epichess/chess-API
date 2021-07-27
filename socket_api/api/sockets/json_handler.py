@@ -5,6 +5,7 @@ from api.sockets.src.ia.chessBitBoard import BitBoardMoveGenerator as BitBoardMo
 from api.sockets.src.ia.move import Move
 import api.sockets.src.ia.boardInfo as boardInfo
 from boardInfo import BoardInfo
+from collections import deque
 import json
 # import api.sockets.chesssimul.square as square
 # import api.sockets.chesssimul.piece as piece
@@ -15,69 +16,55 @@ import json
 # from square import Square
 
 
-# class BoardEncoder(json.JSONEncoder):
-#     def default(self, obj):
-#         if isinstance(obj, Square):
-#             return {'kind': obj.piece.kind.value if obj.piece != None else None, 'color': obj.piece.color.value if obj.piece != None else None}
-#         if isinstance(obj, Color):
-#             return {'color': obj.value}
-#         if isinstance(obj, coup.Move):
-#             return {
-#                 'start': obj.start,
-#                 'end': obj.end,
-#                 'promotion_kind': PieceType(obj.promotion_kind) if obj.promotion_kind != None else None}
-#         return json.JSONEncoder.default(self, obj)
-
-class MoveGeneratorEncoder(json.JSONEncoder):
-    def default(self, obj):
-        return json.JSONEncoder.default(self, obj)
-
-
 class BoardEncoder(json.JSONEncoder):
     def default(self, obj):
-        print("\n>>")
-        print(type(obj))
-        print(">>\n")
+        if isinstance(obj, Move):
+            return {'debug': {}}
         if isinstance(obj, collections.deque):
-            return {'moves': []}
+            arr = []
+            for elem in obj:
+                arr.append(json.dumps(elem.__dict__))
+            return json.dumps(arr)
         if isinstance(obj, BoardInfo):
-            return {'board_info': []}
+            return json.dumps(obj.__dict__)
         if isinstance(obj, BitBoardMoveGenerator):
-            return MoveGeneratorEncoder()
+            return None
         return json.JSONEncoder.default(self, obj)
-
-
-def get_board(dct):
-    j_board = list()
-    index = 0
-    for line in dct:
-        j_board.append(list())
-        for square in line:
-            if square['kind'] == None or square['color'] == None:
-                j_board[index].append(Square(piece=None))
-                continue
-            j_board[index].append(
-                Square(piece=Piece(kind=PieceType(square['kind']) if square['kind'] != None else None, color=Color(square['color']) if square['color'] != None else None)))
-        index += 1
-    return j_board
 
 
 def BoardDecoder(dct):
     board = Board()
 
-    board.move_list = dct['move_list']
-    board.pos_piece_check = dct['pos_piece_check']
-    board.list_piece_pin = dct['list_piece_pin']
+    board.pieces = dct['pieces']
+    board.side_pieces = dct['side_pieces']
+    board.occupancy = dct['occupancy']
 
-    board.board = get_board(dct['board'])
-    board.to_move = Color(dct['to_move']['color'])
-    board.can_black_king_side_castle = dct['can_black_king_side_castle']
-    board.can_black_queen_side_castle = dct['can_black_queen_side_castle']
-    board.can_white_king_side_castle = dct['can_white_king_side_castle']
-    board.can_white_queen_side_castle = dct['can_white_queen_side_castle']
-    board.en_passant_target_square = dct['en_passant_target_square']
-    board.white_check = dct['white_check']
-    board.black_check = dct['black_check']
-    board.halfmove_clock = dct['halfmove_clock']
-    board.fullmove_number = dct['fullmove_number']
+    bmoves = json.loads(dct['moves'])
+    ndeque = deque()
+    for e in bmoves:
+        elem = json.loads(e)
+        ndeque.append(Move(
+            int(elem['start']),
+            int(elem['end']),
+            int(elem['moveType']),
+            int(elem['pieceType']),
+            int(elem['capturedPieceType']),
+            int(elem['specialMoveFlag']),
+            int(elem['promotionPieceType']),
+            bool(elem['castleSide'])
+        ))
+    board.moves = ndeque
+
+    binfos = json.loads(dct['prev_board_infos'])
+    ndeque = deque()
+    for e in binfos:
+        elem = json.loads(e)
+        ndeque.append(BoardInfo(
+            **elem
+        ))
+    board.prev_board_infos = ndeque
+
+    binfo = json.loads(dct['board_info'])
+    board.board_info = BoardInfo(**binfo)
+
     return board
