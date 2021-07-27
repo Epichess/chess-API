@@ -3,7 +3,6 @@
 The backend is written in **Python** and uses **Django** framework.
 Here's the **How to** install and start the **api server**
 
-
 ## Link the backend simulation library
 
 	ln -s [simulation_repo/path] ./socket_api/api/sockets/chesssimul
@@ -33,6 +32,10 @@ Install requirements.txt file with python pip (inside your venv e.g.):
 
 	python -m pip install -r requirements.txt
 
+
+## Create and migrate database
+
+	python manage.py migrate
 
 ## Start the server
 
