@@ -2,7 +2,8 @@ from api.sockets.json_handler import BoardEncoder
 from django.core import serializers
 from datetime import datetime
 from ..models import Game
-from api.sockets.chesssimul.board import Board
+# from api.sockets.chesssimul.board import Board
+from api.sockets.src.ia.chessBitBoard import Bitboard as Board
 import json
 
 
@@ -39,8 +40,12 @@ def game_handler(sio):
     def create_game(sid):
         game = Game(created=datetime.now())
         board = Board()
-        board.init_board()
+
+        # board.init_board()
         game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
+
+        print(game.game_json)
+
         game.save()
         sio.emit('creating', {'data': serializers.serialize(
             'json', [game], fields=('created', 'uuid'))}, room=sid)
