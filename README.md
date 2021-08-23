@@ -5,7 +5,13 @@ Here's the **How to** install and start the **api server**
 
 ## Link the backend simulation library
 
-	ln -s [simulation_repo/path] ./socket_api/api/sockets/chesssimul
+* In a Linux environment :
+
+		ln -s [simulation_repo absolute path]/src [api repo absolute path]/socket_api/api/sockets/src
+		
+* In a windows environment :
+
+		mklink /D [api repo absolute path]/socket_api/api/sockets/src [simulation_repo absolute path]/src
 
 ## Create virtual environment (optional)
 
