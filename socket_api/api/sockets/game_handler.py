@@ -25,7 +25,7 @@ def game_handler(sio):
         sio.emit('message', {'data': msg}, room=str(uuid), skip_sid=sid)
 
     @sio.event
-    def get_games(sid):
+    def get_game(sid, msg):
         """ Retrieve all the games from the database.
 
         Parameters:
@@ -37,29 +37,13 @@ def game_handler(sio):
             }
 
         """
-        games = serializers.serialize(
-            'json', Game.objects.all(), fields=('created', 'uuid', 'game_json'))
-        sio.emit('games', {'data': games}, room=sid)
-
-    @sio.event
-    def get_by_uuid(sid, message):
-        """ Retrieve a specifig game using his unique identifier from the database.
-
-        Parameters:
-            {
-                'uuid': [game uuid]
-            }
-
-
-        Response:
-            {
-                'data': {game object}
-            }
-
-        """
-        games = serializers.serialize(
-            'json', [Game.objects.get(uuid=message['uuid'])])
-        sio.emit('response', {'data': games}, room=sid)
+        if (msg != None and 'uuid' in msg):
+            games = serializers.serialize(
+                'json', [Game.objects.get(uuid=msg['uuid'])])
+        elif (msg != None and 'uuid' not in msg):
+            games = serializers.serialize(
+                'json', Game.objects.all(), fields=('created', 'uuid', 'game_json'))
+        sio.emit('get_game', {'data': games}, room=sid)
 
     @sio.event
     def create_game(sid):
@@ -82,12 +66,12 @@ def game_handler(sio):
 
         print(game.game_json)
 
-        sio.emit('creating', {'data': serializers.serialize(
+        sio.emit('create_game', {'data': serializers.serialize(
             'json', [game], fields=('created', 'uuid'))}, room=sid)
         join_room(sid, game.uuid)
 
     @sio.event
-    def join_game(sid):
+    def join_game(sid, msg):
         """ Join an existing game if it exists.
 
         Parameters:
@@ -99,41 +83,15 @@ def game_handler(sio):
             }
 
         """
-        games = Game.objects.filter(full=False)
-        # check opponent level ?
+        if (msg != None and 'uuid' not in msg):
+            games = Game.objects.filter(full=False)
+        elif (msg != None and 'uuid' in msg):
+            games = Game.objects.filter(uuid=msg['uuid'])
         if (len(games) > 0):
             game = games[0]
             game.full = True
             game.save()
-            sio.emit('joining', {'data': serializers.serialize(
-                'json', [game], fields=('created', 'uuid'))}, room=sid)
-            join_room(sid, game.uuid)
-        else:
-            sio.emit('error', {
-                'data': 'No currently joinable game'
-            }, room=sid)
-
-    @sio.event
-    def join_game_uuid(sid, msg):
-        """ Join an existing game using his unique identifier.
-
-        Parameters:
-            {
-                'uuid': [game uuid]
-            }
-
-        Response:
-            {
-                'data': {game object}
-            }
-
-        """
-        games = Game.objects.filter(uuid=msg['uuid'])
-        if (len(games) > 0):
-            game = games[0]
-            game.full = True
-            game.save()
-            sio.emit('joining', {'data': serializers.serialize(
+            sio.emit('join_game', {'data': serializers.serialize(
                 'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
         else:
@@ -155,12 +113,11 @@ def game_handler(sio):
 
         """
         games = Game.objects.filter(full=False)
-        # check opponent level ?
         if (len(games) > 0):
             game = games[0]
             game.full = True
             game.save()
-            sio.emit('joining', {'data': serializers.serialize(
+            sio.emit('join_game', {'data': serializers.serialize(
                 'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
         else:
@@ -170,7 +127,7 @@ def game_handler(sio):
             game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
             game.save()
 
-            sio.emit('creating', {'data': serializers.serialize(
+            sio.emit('create_game', {'data': serializers.serialize(
                 'json', [game], fields=('created', 'uuid'))}, room=sid)
             join_room(sid, game.uuid)
 
