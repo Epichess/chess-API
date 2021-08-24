@@ -2,6 +2,7 @@ asgiref==3.3.4
 autopep8==1.5.7
 bidict==0.21.2
 Django==3.2.4
+django-cors-headers==3.8.0
 dnspython==1.16.0
 enum-compat==0.0.3
 eventlet==0.25.2
