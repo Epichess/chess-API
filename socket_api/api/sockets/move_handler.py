@@ -57,6 +57,9 @@ def move_handler(sio):
         else:
             sio.emit('move', {'data': 'move isn\'t legal', 'legal': 'false'})
 
+        # sio.emit('make_move', {'data': 'fen'},
+        #      room=uuid)
+
     @sio.event
     def ask_move(sid, message):
         """ Returns possible move starting from a given square.
