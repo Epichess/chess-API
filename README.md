@@ -17,16 +17,16 @@ Here's the **How to** install and start the **api server**
 
 **Create** a virtual environment with python :
 
-	python -m venv [venv directory name i.e .venv]
+	python -m venv [venv directory name e.g .venv]
 
 **Activate** an existing virtual environment :
 
 * In a Linux environment :
 
-		source .venv/bin/activate
+		source [venv direcotry name e.g .venv]/bin/activate
 * In a windows environment :
 
-		.venv\Scripts\activate.bat
+		[venv direcotry name e.g .venv]\Scripts\activate.bat
 
 **Exit** a virtual environment :
 
@@ -34,19 +34,23 @@ Here's the **How to** install and start the **api server**
 
 ## Install python pre-requisites
 
-Install requirements.txt file with python pip (inside your venv e.g.):
+Install requirements.txt file with python pip (with virtual envirnoment activated):
 
 	python -m pip install -r requirements.txt
 
 
 ## Create and migrate database
 
+	cd socket_api
 	python manage.py migrate
 
 ## Start the server
 
 1. Go to the **Django** root directory
-2. Start the server :
+
+		cd socket_api
+		
+3. Start the server :
 	
 		python manage.py runserver
 
