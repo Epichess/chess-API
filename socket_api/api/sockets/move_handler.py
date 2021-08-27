@@ -37,6 +37,14 @@ def move_handler(sio):
         end = message['end']
         game = Game.objects.get(uuid=uuid)
 
+        print("START")
+        print(start)
+        print("END")
+        print(end)
+
+        sio.emit('make_move', {'data': {'fen': 'le move est pas processed'}})
+        return
+
         board = BoardDecoder(json.loads(game.game_json))
 
         coord = translate_coord(start, end)
@@ -48,3 +56,23 @@ def move_handler(sio):
             sio.emit('move', {'data': 'success', 'legal': 'true'})
         else:
             sio.emit('move', {'data': 'move isn\'t legal', 'legal': 'false'})
+
+    @sio.event
+    def ask_move(sid, message):
+        """ Returns possible move starting from a given square.
+
+        Parameters:
+            {
+                'uuid': [game uuid],
+                'start': [starting square e.g. 'A2'],
+                'end': [ending square e.g. 'A2']
+            }
+
+        Response:
+            {
+                'data': [message],
+                'legal': [boolean]
+            }
+
+        """
+        sio.emit('ask_move', {'data': 'EN COURS DE DEPLOIEMENT'})
