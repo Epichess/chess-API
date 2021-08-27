@@ -33,8 +33,7 @@ move_handler(sio)
 
 @sio.event
 def pong(sid, message):
-    data = json.loads(message)
-    sio.emit('response', {'data': data['text']})
+    sio.emit('pong', {'data': message['text']})
 
 
 @sio.event
