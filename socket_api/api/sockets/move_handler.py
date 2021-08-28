@@ -1,16 +1,19 @@
+from json.decoder import JSONDecoder
+from json.encoder import JSONEncoder
 from django.core import serializers
 from datetime import datetime
 from api.sockets.json_handler import BoardDecoder, BoardEncoder
 from ..models import Game
 from api.sockets.src.ia.move import Move
+from api.sockets.src.ia.gameApi import GameChecker
 import json
 
 
 def move_handler(sio):
 
     def translate_coord(start, end):
-        start_index = (ord(start[0].upper()) - 65) + ((int(start[1]) - 1) * 8)
-        end_index = (ord(end[0].upper()) - 65) + ((int(end[1]) - 1) * 8)
+        start_index = (7 - start['row']) * 8 + (start['col'])
+        end_index = (7 - end['row']) * 8 + (end['col'])
 
         return (start_index, end_index)
 
@@ -36,26 +39,20 @@ def move_handler(sio):
         start = message['start']
         end = message['end']
         game = Game.objects.get(uuid=uuid)
-
-        print("START")
-        print(start)
-        print("END")
-        print(end)
-
-        sio.emit('make_move', {'data': {'fen': 'le move est pas processed'}})
-        return
-
-        board = BoardDecoder(json.loads(game.game_json))
-
         coord = translate_coord(start, end)
-        move = Move(coord[0], coord[1], 1, 0)
 
-        if (board.make_move(move)):
-            game.game_json = json.dumps(board.__dict__, cls=BoardEncoder)
-            game.save()
-            sio.emit('move', {'data': 'success', 'legal': 'true'})
-        else:
-            sio.emit('move', {'data': 'move isn\'t legal', 'legal': 'false'})
+        gc = GameChecker(
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+        move = gc.makeMoveAPI(coord[0], coord[1])
+
+        sio.emit('make_move', {
+            'isMoveValid': move.isMoveValid,
+            'isKingCheck': move.isKingCheck,
+            'isGameOver': move.isGameOver,
+            'fen': move.fen,
+            'start': start,
+            'end': end
+        }, room=uuid)
 
         # sio.emit('make_move', {'data': 'fen'},
         #      room=uuid)
