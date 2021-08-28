@@ -41,9 +41,15 @@ def move_handler(sio):
         game = Game.objects.get(uuid=uuid)
         coord = translate_coord(start, end)
 
-        gc = GameChecker(
-            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+        print(start, end)
+        print(coord)
+        print(game)
+
+        gc = GameChecker(game.fen)
         move = gc.makeMoveAPI(coord[0], coord[1])
+
+        game.fen = move.fen
+        game.save()
 
         sio.emit('make_move', {
             'isMoveValid': move.isMoveValid,

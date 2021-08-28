@@ -19,9 +19,11 @@ class Game(models.Model):
         max_length=1000, default=json.dumps(Board().__dict__))
     uuid = models.UUIDField(default=uuid4)
     full = models.BooleanField(default=False)
+    fen = models.CharField(
+        max_length=60, default='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
     def __str__(self):
-        return "{0}\n{1}\n{2}\n{3}\n".format(self.created, self.uuid, self.game_json, str(self.full))
+        return "{0}\n{1}\n{2}\n{3}\n{4}\n".format(self.created, self.uuid, self.game_json, str(self.full), self.fen)
 
 
 class Player(models.Model):
