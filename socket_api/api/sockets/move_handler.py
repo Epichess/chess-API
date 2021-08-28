@@ -11,6 +11,14 @@ import json
 
 def move_handler(sio):
 
+    def int_to_coord(nb):
+        col = nb % 8
+        row = 7 - int(nb / 8)
+        return {
+            'row': row,
+            'col': col
+        }
+
     def translate_coord(start, end):
         start_index = (7 - start['row']) * 8 + (start['col'])
         end_index = (7 - end['row']) * 8 + (end['col'])
@@ -40,10 +48,6 @@ def move_handler(sio):
         end = message['end']
         game = Game.objects.get(uuid=uuid)
         coord = translate_coord(start, end)
-
-        print(start, end)
-        print(coord)
-        print(game)
 
         gc = GameChecker(game.fen)
         move = gc.makeMoveAPI(coord[0], coord[1])
@@ -81,4 +85,16 @@ def move_handler(sio):
             }
 
         """
-        sio.emit('ask_move', {'data': 'EN COURS DE DEPLOIEMENT'})
+        uuid = message['uuid']
+        game = Game.objects.get(uuid=uuid)
+        coord = translate_coord(message['start'], message['start'])[0]
+
+        gc = GameChecker(game.fen)
+        moves = gc.askMoveAPI(coord)
+
+        arr = []
+
+        for move in moves:
+            arr.append(int_to_coord(move.end))
+
+        sio.emit('ask_move', arr)
