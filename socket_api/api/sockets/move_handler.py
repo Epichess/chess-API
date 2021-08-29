@@ -74,14 +74,21 @@ def move_handler(sio):
         Parameters:
             {
                 'uuid': [game uuid],
-                'start': [starting square e.g. 'A2'],
-                'end': [ending square e.g. 'A2']
+                'start': {
+                    'row': int,
+                    'col': int
+                },
             }
 
         Response:
             {
-                'data': [message],
-                'legal': [boolean]
+                [
+                    {
+                        'row': int,
+                        'col': int
+                    }
+                    ...
+                ]
             }
 
         """
@@ -98,3 +105,31 @@ def move_handler(sio):
             arr.append(int_to_coord(move.end))
 
         sio.emit('ask_move', arr)
+
+    @sio.event
+    def make_move_AI(sid, message):
+        """ Returns AI move.
+
+        Parameters:
+            {
+                'uuid': [game uuid]
+            }
+
+        Response:
+            {
+                {
+                    'row': int,
+                    'col': int
+                }
+            }
+
+        """
+        uuid = message['uuid']
+        game = Game.objects.get(uuid=uuid)
+
+        # gc = GameChecker(game.fen)
+        # moves = gc.askMoveAPI(coord)
+
+        move = int_to_coord(25).end
+
+        sio.emit('make_move_AI', move)
