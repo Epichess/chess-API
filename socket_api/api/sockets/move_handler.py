@@ -132,5 +132,9 @@ def move_handler(sio):
 
         move = int_to_coord(gc.makeMoveAI().end)
 
-        sio.emit('make_move_AI', move)
-        print("ALLO")
+        sio.emit('make_move', {
+            'isMoveValid': move.isMoveValid,
+            'isKingCheck': move.isKingCheck,
+            'isGameOver': move.isGameOver,
+            'fen': move.fen
+        }, room=uuid)
