@@ -46,11 +46,12 @@ def move_handler(sio):
         uuid = message['uuid']
         start = message['start']
         end = message['end']
+        promotionType = message['promotionType']
         game = Game.objects.get(uuid=uuid)
         coord = translate_coord(start, end)
 
         gc = GameChecker(game.fen)
-        move = gc.makeMoveAPI(coord[0], coord[1])
+        move = gc.makeMoveAPI(coord[0], coord[1], promotionType)
 
         game.fen = move.fen
         game.save()
