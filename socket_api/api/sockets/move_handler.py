@@ -128,9 +128,13 @@ def move_handler(sio):
         uuid = message['uuid']
         game = Game.objects.get(uuid=uuid)
 
-        # gc = GameChecker(game.fen)
-        # moves = gc.askMoveAPI(coord)
+        gc = GameChecker(game.fen)
 
-        move = int_to_coord(25).end
+        move = int_to_coord(gc.makeMoveAI().end)
 
-        sio.emit('make_move_AI', move)
+        sio.emit('make_move', {
+            'isMoveValid': move.isMoveValid,
+            'isKingCheck': move.isKingCheck,
+            'isGameOver': move.isGameOver,
+            'fen': move.fen
+        }, room=uuid)
