@@ -53,6 +53,8 @@ def move_handler(sio):
         gc = GameChecker(game.fen)
         move = gc.makeMoveAPI(coord[0], coord[1], promotionType)
 
+        print(move.isGameOver)
+
         game.fen = move.fen
         game.save()
 
