@@ -53,6 +53,8 @@ def move_handler(sio):
         gc = GameChecker(game.fen)
         move = gc.makeMoveAPI(coord[0], coord[1], promotionType)
 
+        print(move.isGameOver)
+
         game.fen = move.fen
         game.save()
 
@@ -61,6 +63,7 @@ def move_handler(sio):
             'isKingCheck': move.isKingCheck,
             'isGameOver': move.isGameOver,
             'fen': move.fen,
+            'isAIMove': False,
             'start': start,
             'end': end
         }, room=uuid)
@@ -125,16 +128,23 @@ def move_handler(sio):
             }
 
         """
+
+        print('trying to make AI move')
+        print(message)
         uuid = message['uuid']
         game = Game.objects.get(uuid=uuid)
 
         gc = GameChecker(game.fen)
 
-        move = int_to_coord(gc.makeMoveAI().end)
+        move = gc.makeMoveAI()
+
+        game.fen = move.fen
+        game.save()
 
         sio.emit('make_move', {
             'isMoveValid': move.isMoveValid,
             'isKingCheck': move.isKingCheck,
-            'isGameOver': move.isGameOver,
-            'fen': move.fen
+            'isGameOver': False,
+            'fen': move.fen,
+            'isAIMove': True
         }, room=uuid)
